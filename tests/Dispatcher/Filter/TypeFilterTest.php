@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Denimsoft\FsNotify\Test\Dispatcher\Filter;
 
 use Denimsoft\FsNotify\Dispatcher\Filter\TypeFilter;
@@ -7,11 +9,6 @@ use Denimsoft\FsNotify\Event\FileModifiedEvent;
 
 class TypeFilterTest extends FilterTestCase
 {
-    protected function getFilterClass(): string
-    {
-        return TypeFilter::class;
-    }
-
     public function canDispatchProvider(): array
     {
         return [
@@ -27,12 +24,17 @@ class TypeFilterTest extends FilterTestCase
      *
      * @param string $filterValue
      * @param string $filetype
-     * @param bool $expectation
+     * @param bool   $expectation
      */
-    public function testCanDispatchEvent(string $filterValue, string $filetype, bool $expectation)
+    public function testCanDispatchEvent(string $filterValue, string $filetype, bool $expectation): void
     {
         $event = new FileModifiedEvent('/opt/fsnotify/vendor/autoload.php', ['filetype' => $filetype]);
 
-        $this->assertEquals($expectation, $this->createFilterCallCanDispatchEvent($filterValue, $event));
+        $this->assertSame($expectation, $this->createFilterCallCanDispatchEvent($filterValue, $event));
+    }
+
+    protected function getFilterClass(): string
+    {
+        return TypeFilter::class;
     }
 }

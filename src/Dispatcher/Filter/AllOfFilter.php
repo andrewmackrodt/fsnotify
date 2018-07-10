@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Denimsoft\FsNotify\Dispatcher\Filter;
 
 use Denimsoft\FsNotify\Event\FileEvent;
@@ -22,7 +24,7 @@ class AllOfFilter implements FsNotifyFilter
     public function canDispatchEvent(FileEvent $event, string $relFilepath): bool
     {
         foreach ($this->filters as $filter) {
-            if (!$filter->canDispatchEvent($event, $relFilepath)) {
+            if ( ! $filter->canDispatchEvent($event, $relFilepath)) {
                 return false;
             }
         }

@@ -1,16 +1,13 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Denimsoft\FsNotify\Test\Dispatcher\Filter;
 
 use Denimsoft\FsNotify\Dispatcher\Filter\NameFilter;
 
 class NameFilterTest extends FilterTestCase
 {
-    protected function getFilterClass(): string
-    {
-        return NameFilter::class;
-    }
-
     public function canDispatchProvider(): array
     {
         return [
@@ -27,10 +24,15 @@ class NameFilterTest extends FilterTestCase
      * @dataProvider canDispatchProvider
      *
      * @param string $filterValue
-     * @param bool $expectation
+     * @param bool   $expectation
      */
-    public function testCanDispatchEvent(string $filterValue, bool $expectation)
+    public function testCanDispatchEvent(string $filterValue, bool $expectation): void
     {
-        $this->assertEquals($expectation, $this->createFilterCallCanDispatchEvent($filterValue));
+        $this->assertSame($expectation, $this->createFilterCallCanDispatchEvent($filterValue));
+    }
+
+    protected function getFilterClass(): string
+    {
+        return NameFilter::class;
     }
 }

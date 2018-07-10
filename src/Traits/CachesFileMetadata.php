@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Denimsoft\FsNotify\Traits;
 
 use SplFileInfo;
@@ -13,13 +15,13 @@ trait CachesFileMetadata
 
     /**
      * @param SplFileInfo|string $file
-     * @param array|null $oldFileMetadata
+     * @param array|null         $oldFileMetadata
      *
      * @return array
      */
     protected function getFileMetadata($file, &$oldFileMetadata = null): array
     {
-        if (!$file instanceof SplFileInfo) {
+        if ( ! $file instanceof SplFileInfo) {
             $file = new SplFileInfo($file);
         }
 

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Denimsoft\FsNotify;
 
 use Denimsoft\FsNotify\Event\FsNotifyEvent;

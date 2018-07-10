@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Denimsoft\FsNotify;
 
 use Amp\Loop;
@@ -20,14 +22,14 @@ class FsNotifyBuilder
     use FileEventListener;
 
     /**
-     * @var ReactAdapter|null
-     */
-    private $eventLoop;
-
-    /**
      * @var FsNotifyAdapter|null
      */
     private $adapter;
+
+    /**
+     * @var ReactAdapter|null
+     */
+    private $eventLoop;
 
     /**
      * @var EventDispatcherInterface|null
@@ -39,30 +41,27 @@ class FsNotifyBuilder
      */
     private $watchers = [];
 
+    public function addWatcher(string $filepath, bool $recurse = false): Watcher
+    {
+        $this->watchers[] = new Watcher($filepath, $recurse, $this);
+
+        return end($this->watchers);
+    }
+
     public function createFsNotify(): FsNotify
     {
         $fsNotify = new FsNotify(
-            $this->eventLoop  ?? ($this->eventLoop = $this->createDefaultEventLoop()),
-            $this->adapter    ?? ($this->adapter   = $this->createDefaultAdapter()),
+            $this->eventLoop ?? ($this->eventLoop = $this->createDefaultEventLoop()),
+            $this->adapter ?? ($this->adapter = $this->createDefaultAdapter()),
             new EventBridge(
-                $this->events ?? ($this->events    = $this->createDefaultEventDispatcher())),
-            $this->watchers);
+                $this->events ?? ($this->events = $this->createDefaultEventDispatcher())
+            ),
+            $this->watchers
+        );
 
         $this->registerEventHandlers($this->events);
 
         return $fsNotify;
-    }
-
-    public function setEventLoop(ReactAdapter $eventLoop): self
-    {
-        $this->eventLoop = $eventLoop;
-
-        return $this;
-    }
-
-    private function createDefaultEventLoop(): ReactAdapter
-    {
-        return new ReactAdapter(Loop::get());
     }
 
     public function setAdapter(FsNotifyAdapter $adapter): self
@@ -72,11 +71,6 @@ class FsNotifyBuilder
         return $this;
     }
 
-    private function createDefaultAdapter(): FsNotifyAdapter
-    {
-        return new PhpAdapter();
-    }
-
     public function setEventDispatcher(EventDispatcherInterface $events): self
     {
         $this->events = $events;
@@ -84,52 +78,26 @@ class FsNotifyBuilder
         return $this;
     }
 
+    public function setEventLoop(ReactAdapter $eventLoop): self
+    {
+        $this->eventLoop = $eventLoop;
+
+        return $this;
+    }
+
+    private function createDefaultAdapter(): FsNotifyAdapter
+    {
+        return new PhpAdapter();
+    }
+
     private function createDefaultEventDispatcher(): EventDispatcherInterface
     {
         return new EventDispatcher();
     }
 
-    public function addWatcher(string $filepath, bool $recurse = false): Watcher
+    private function createDefaultEventLoop(): ReactAdapter
     {
-        $this->watchers[] = new Watcher($filepath, $recurse, $this);
-
-        return end($this->watchers);
-    }
-
-    /**
-     * @param EventDispatcherInterface $events
-     * @param ReactAdapter $eventLoop
-     *
-     * @return EventSubscriberInterface[]
-     */
-    private function subscribeWatcherFileEvents(EventDispatcherInterface $events, ReactAdapter $eventLoop): array
-    {
-        $subscribers = [];
-
-        foreach ($this->watchers as $watcher) {
-            $watcherDispatcher = new WatcherDispatcher($watcher, $eventLoop);
-            $subscriber = new FileEventSubscriber($watcherDispatcher);
-            $subscribers[] = $subscriber;
-
-            $events->addSubscriber($subscriber);
-        }
-
-        return $subscribers;
-    }
-
-    /**
-     * @param EventDispatcherInterface $events
-     * @param ReactAdapter $eventLoop
-     *
-     * @return EventSubscriberInterface[]
-     */
-    private function subscribeGlobalFileEvents(EventDispatcherInterface $events, ReactAdapter $eventLoop): array
-    {
-        $globalDispatcher = new GlobalDispatcher($this->getListeners(), $this->watchers, $eventLoop);
-        $subscriber = new FileEventSubscriber($globalDispatcher);
-        $events->addSubscriber($subscriber);
-
-        return [$subscriber];
+        return new ReactAdapter(Loop::get());
     }
 
     private function registerEventHandlers(EventDispatcherInterface $events): void
@@ -145,7 +113,7 @@ class FsNotifyBuilder
                 ShutdownEvent $event,
                 string $name,
                 EventDispatcher $events
-            ) use ($subscribers, &$shutdownEvent) {
+            ) use ($subscribers, &$shutdownEvent): void {
                 foreach ($subscribers as $subscriber) {
                     $events->removeSubscriber($subscriber);
                 }
@@ -153,5 +121,41 @@ class FsNotifyBuilder
                 $events->removeListener(ShutdownEvent::getEventName(), $shutdownEvent);
             }
         );
+    }
+
+    /**
+     * @param EventDispatcherInterface $events
+     * @param ReactAdapter             $eventLoop
+     *
+     * @return EventSubscriberInterface[]
+     */
+    private function subscribeGlobalFileEvents(EventDispatcherInterface $events, ReactAdapter $eventLoop): array
+    {
+        $globalDispatcher = new GlobalDispatcher($this->getListeners(), $this->watchers, $eventLoop);
+        $subscriber       = new FileEventSubscriber($globalDispatcher);
+        $events->addSubscriber($subscriber);
+
+        return [$subscriber];
+    }
+
+    /**
+     * @param EventDispatcherInterface $events
+     * @param ReactAdapter             $eventLoop
+     *
+     * @return EventSubscriberInterface[]
+     */
+    private function subscribeWatcherFileEvents(EventDispatcherInterface $events, ReactAdapter $eventLoop): array
+    {
+        $subscribers = [];
+
+        foreach ($this->watchers as $watcher) {
+            $watcherDispatcher = new WatcherDispatcher($watcher, $eventLoop);
+            $subscriber        = new FileEventSubscriber($watcherDispatcher);
+            $subscribers[]     = $subscriber;
+
+            $events->addSubscriber($subscriber);
+        }
+
+        return $subscribers;
     }
 }

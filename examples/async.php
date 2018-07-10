@@ -1,12 +1,12 @@
 #!/usr/bin/env php
 <?php
 /**
- * Example demonstrating using an async callback
+ * Example demonstrating using an async callback.
  */
-
 use Amp\Process\Process;
 use Amp\ReactAdapter\ReactAdapter;
 use Denimsoft\FsNotify\Dispatcher\Filter\FsNotifyFilter;
+use Denimsoft\FsNotify\Event\FileDeletedEvent;
 use Denimsoft\FsNotify\Event\FileEvent;
 use Denimsoft\FsNotify\FsNotifyBuilder;
 
@@ -24,7 +24,7 @@ $fsNotify = (new FsNotifyBuilder())
             $suffix = "{$event->getEventName()}($mtime): {$event->getFilepath()}\n";
             echo $suffix;
 
-            for ($i = 1; $i <= 5; $i++) {
+            for ($i = 1; $i <= 5; ++$i) {
                 $process = new Process('sleep 2; date');
                 $process->start();
                 while (($chunk = yield $process->getStdout()->read()) !== null) {
@@ -35,16 +35,18 @@ $fsNotify = (new FsNotifyBuilder())
             // stop fsNotify
             $fsNotify->stop();
         },
-        // only respond to the first file event
-        new class () implements FsNotifyFilter {
+        // only respond to the first non file deleted event
+        new class() implements FsNotifyFilter {
             public function canDispatchEvent(FileEvent $event, string $relFilepath): bool
             {
                 static $firstMetadata;
 
-                return ($firstMetadata ?? ($firstMetadata = $event->getMetadata())) === $event->getMetadata();
+                return ! $event instanceof FileDeletedEvent &&
+                    ($firstMetadata ?? ($firstMetadata = $event->getMetadata())) === $event->getMetadata();
             }
-        })
-    ->addChangeListener(function (FileEvent $event) use (&$fsNotify) {
+        }
+    )
+    ->addChangeListener(function (FileEvent $event) use (&$fsNotify): void {
         $mtime = $event->getMetadata()['modified'] ?? 0;
 
         echo "{$event->getEventName()}($mtime): {$event->getFilepath()}\n";

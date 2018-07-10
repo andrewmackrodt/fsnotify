@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Denimsoft\FsNotify\Test\Dispatcher\Filter;
 
 use Denimsoft\FsNotify\Dispatcher\Filter\PathFilter;
@@ -7,11 +9,6 @@ use Denimsoft\FsNotify\Event\FileModifiedEvent;
 
 class PathFilterTest extends FilterTestCase
 {
-    protected function getFilterClass(): string
-    {
-        return PathFilter::class;
-    }
-
     public function canDispatchProvider(): array
     {
         return [
@@ -33,12 +30,17 @@ class PathFilterTest extends FilterTestCase
      *
      * @param string $relFilepath
      * @param string $filterValue
-     * @param bool $expectation
+     * @param bool   $expectation
      */
-    public function testCanDispatchEvent(string $relFilepath, string $filterValue, bool $expectation)
+    public function testCanDispatchEvent(string $relFilepath, string $filterValue, bool $expectation): void
     {
         $event = new FileModifiedEvent("/opt/fsnotify/$relFilepath", []);
 
-        $this->assertEquals($expectation, $this->createFilterCallCanDispatchEvent($filterValue, $event));
+        $this->assertSame($expectation, $this->createFilterCallCanDispatchEvent($filterValue, $event));
+    }
+
+    protected function getFilterClass(): string
+    {
+        return PathFilter::class;
     }
 }

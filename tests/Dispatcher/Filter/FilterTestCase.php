@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Denimsoft\FsNotify\Test\Dispatcher\Filter;
 
 use Denimsoft\FsNotify\Dispatcher\Filter\FsNotifyFilter;
@@ -11,39 +13,22 @@ use Mockery\MockInterface;
 
 abstract class FilterTestCase extends TestCase
 {
-    abstract protected function getFilterClass(): string;
-
     abstract protected function canDispatchProvider(): array;
-
-    protected function createFilterCallCanDispatchEvent($filterValue, FileEvent $event = null)
-    {
-        $filter = $this->createFilter($filterValue);
-        $event = $event ?? new FileModifiedEvent('/opt/fsnotify/src/Dispatcher/Filter/NameFilter.php', []);
-        $relFilepath = substr($event->getFilepath(), strlen('/opt/fsnotify/'));
-
-        return $filter->canDispatchEvent($event, $relFilepath);
-    }
 
     protected function createFilter($filterValue): FsNotifyFilter
     {
         $class = $this->getFilterClass();
 
         return new $class($filterValue);
-
     }
 
-    /**
-     * @param bool $return
-     * @param int $times
-     *
-     * @return FsNotifyFilter|MockInterface
-     */
-    protected function createMockFilterWithReturn(bool $return, int $times = 1): FsNotifyFilter
+    protected function createFilterCallCanDispatchEvent($filterValue, FileEvent $event = null)
     {
-        $filter = Mockery::mock(FsNotifyFilter::class);
-        $filter->shouldReceive('canDispatchEvent')->times($times)->andReturn($return);
+        $filter      = $this->createFilter($filterValue);
+        $event       = $event ?? new FileModifiedEvent('/opt/fsnotify/src/Dispatcher/Filter/NameFilter.php', []);
+        $relFilepath = substr($event->getFilepath(), strlen('/opt/fsnotify/'));
 
-        return $filter;
+        return $filter->canDispatchEvent($event, $relFilepath);
     }
 
     /**
@@ -56,4 +41,20 @@ abstract class FilterTestCase extends TestCase
 
         return $filter;
     }
+
+    /**
+     * @param bool $return
+     * @param int  $times
+     *
+     * @return FsNotifyFilter|MockInterface
+     */
+    protected function createMockFilterWithReturn(bool $return, int $times = 1): FsNotifyFilter
+    {
+        $filter = Mockery::mock(FsNotifyFilter::class);
+        $filter->shouldReceive('canDispatchEvent')->times($times)->andReturn($return);
+
+        return $filter;
+    }
+
+    abstract protected function getFilterClass(): string;
 }

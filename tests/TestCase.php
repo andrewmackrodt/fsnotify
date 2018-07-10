@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Denimsoft\FsNotify\Test;
 
 use Mockery;
@@ -7,7 +9,7 @@ use PHPUnit\Framework\TestCase as BaseTestCase;
 
 class TestCase extends BaseTestCase
 {
-    public function tearDown()
+    public function tearDown(): void
     {
         parent::tearDown();
 

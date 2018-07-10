@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Denimsoft\FsNotify\Dispatcher\Filter;
 
 use Denimsoft\FsNotify\Event\FileEvent;
@@ -18,6 +20,6 @@ class PatternFilter implements FsNotifyFilter
 
     public function canDispatchEvent(FileEvent $event, string $relFilepath): bool
     {
-        return preg_match($this->pattern, $relFilepath);
+        return (bool) preg_match($this->pattern, $relFilepath);
     }
 }

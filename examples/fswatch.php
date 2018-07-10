@@ -2,13 +2,12 @@
 <?php
 /**
  * Example using the FswatchAdapter and ignoring Jetbrains IDE temp files
- * created during atomic file saves
+ * created during atomic file saves.
  */
-
 use Denimsoft\FsNotify\Adapter\FswatchAdapter;
 use Denimsoft\FsNotify\Dispatcher\Filter\NameFilter;
-use function Denimsoft\FsNotify\Dispatcher\Filter\not;
 use Denimsoft\FsNotify\FsNotifyBuilder;
+use function Denimsoft\FsNotify\Dispatcher\Filter\not;
 
 require_once __DIR__ . '/bootstrap.php';
 

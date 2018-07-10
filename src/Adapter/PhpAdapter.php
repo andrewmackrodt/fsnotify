@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Denimsoft\FsNotify\Adapter;
 
 use Amp\Delayed;
@@ -28,19 +30,19 @@ class PhpAdapter extends ConfigurableAdapter
      */
     private $firstLoop = true;
 
-    public static function getDefaultOptions(): array
-    {
-        return [
-            self::OPTION_POLL_INTERVAL => 1.00,
-        ];
-    }
-
     public static function getCapabilities(): array
     {
         return [
             self::CAPABILITY_DETECTS_PARENT_DIRECTORY_MODIFIED,
             self::CAPABILITY_RECURSES_DIRECTORY_ON_COPY,
             self::CAPABILITY_RECURSES_DIRECTORY_ON_MOVE,
+        ];
+    }
+
+    public static function getDefaultOptions(): array
+    {
+        return [
+            self::OPTION_POLL_INTERVAL => 1.00,
         ];
     }
 
@@ -56,12 +58,67 @@ class PhpAdapter extends ConfigurableAdapter
 
                     $this->dispatch($fileEvents, $eventBridge);
 
-                    yield new Delayed(1000.0 * $this->options[self::OPTION_POLL_INTERVAL]);
+                    yield new Delayed((int) (1000.0 * $this->options[self::OPTION_POLL_INTERVAL]));
                 }
             }),
-            function () use (&$running) {
+            function () use (&$running): void {
                 $running = false;
-            });
+            }
+        );
+    }
+
+    private function createFileEvents(array $modified, array $created, array $deleted): array
+    {
+        $events = [];
+
+        /*
+         * @var string
+         * @var SplFileInfo $file
+         */
+        foreach ($modified as $filename => $metadata) {
+            $events[] = new FileModifiedEvent($filename, $metadata);
+        }
+
+        foreach ($created as $filename => $metadata) {
+            $events[] = new FileCreatedEvent($filename, $metadata);
+        }
+
+        foreach ($deleted as $filename => $metadata) {
+            $events[] = new FileDeletedEvent($filename, $metadata);
+        }
+
+        return $events;
+    }
+
+    private function diff(array $files): array
+    {
+        $modified = [];
+        $created  = [];
+        $deleted  = array_diff_key($this->metadata, $files);
+
+        if ($deleted) {
+            $this->metadata = array_diff_key($this->metadata, $deleted);
+        }
+
+        foreach ($files as $key => $file) {
+            $fileMetadata = $this->getFileMetadata($file, $oldFileMetadata);
+
+            if ($fileMetadata === $oldFileMetadata) {
+                continue;
+            }
+
+            if ( ! $oldFileMetadata) {
+                $created[$key] = $fileMetadata;
+            } else {
+                $modified[$key] = $fileMetadata;
+            }
+        }
+
+        if ($this->firstLoop) {
+            return []; // no need to construct events
+        }
+
+        return $this->createFileEvents($modified, $created, $deleted);
     }
 
     private function dispatch(array $events, EventBridge $eventBridge): void
@@ -92,7 +149,7 @@ class PhpAdapter extends ConfigurableAdapter
         $filepath = $watcher->getFilepath();
 
         clearstatcache(true, $filepath);
-        
+
         if (is_file($filepath)) {
             $files = [];
 
@@ -112,19 +169,21 @@ class PhpAdapter extends ConfigurableAdapter
     {
         $allFiles = [];
 
-        /** @var SplFileInfo[] $dirFiles */
+        /* @var SplFileInfo[] $dirFiles */
         try {
             $dirFiles = iterator_to_array(
                 new RecursiveDirectoryIterator(
                     $dirname,
                     RecursiveDirectoryIterator::SKIP_DOTS
-                ));
+                )
+            );
         } catch (UnexpectedValueException $e) {
-            if (!array_filter(
+            if ( ! array_filter(
                     self::DIRECTORY_ITERATOR_IGNORED_ERRORS,
-                    function (string $error) use ($e) : string {
+                    function (string $error) use ($e) {
                         return stripos($e->getMessage(), $error) !== false;
-                    })
+                    }
+            )
             ) {
                 throw $e;
             }
@@ -141,11 +200,11 @@ class PhpAdapter extends ConfigurableAdapter
         }
 
         if ($depth) {
-            $depth--;
+            --$depth;
         }
 
         foreach ($dirFiles as $file) {
-            if (!$file->isDir() || $file->isLink()) {
+            if ( ! $file->isDir() || $file->isLink()) {
                 continue;
             }
 
@@ -153,60 +212,5 @@ class PhpAdapter extends ConfigurableAdapter
         }
 
         return $allFiles;
-    }
-
-    private function diff(array $files): array
-    {
-        $modified = [];
-        $created  = [];
-        $deleted  = array_diff_key($this->metadata, $files);
-
-        if ($deleted) {
-            $this->metadata = array_diff_key($this->metadata, $deleted);
-        }
-
-        foreach ($files as $key => $file) {
-            $fileMetadata = $this->getFileMetadata($file, $oldFileMetadata);
-
-            if ($fileMetadata === $oldFileMetadata) {
-                continue;
-            }
-
-            if (!$oldFileMetadata) {
-                $created[$key]  = $fileMetadata;
-            } else {
-                $modified[$key] = $fileMetadata;
-            }
-        }
-
-        if ($this->firstLoop) {
-            return []; // no need to construct events
-        }
-
-        return $this->createFileEvents($modified, $created, $deleted);
-    }
-
-    private function createFileEvents(array $modified, array $created, array $deleted): array
-    {
-        $events = [];
-
-        /**
-         * @var string $filename
-         * @var SplFileInfo $file
-         */
-
-        foreach ($modified as $filename => $metadata) {
-            $events[] = new FileModifiedEvent($filename, $metadata);
-        }
-
-        foreach ($created as $filename => $metadata) {
-            $events[] = new FileCreatedEvent($filename, $metadata);
-        }
-
-        foreach ($deleted as $filename => $metadata) {
-            $events[] = new FileDeletedEvent($filename, $metadata);
-        }
-
-        return $events;
     }
 }

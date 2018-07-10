@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Denimsoft\FsNotify\Adapter;
 
 use Amp\Promise;
@@ -18,7 +20,7 @@ class AsyncWatch
 
     public function __construct(Promise $promise, callable $shutdownHandler = null)
     {
-        $this->promise = $promise;
+        $this->promise         = $promise;
         $this->shutdownHandler = $shutdownHandler;
     }
 

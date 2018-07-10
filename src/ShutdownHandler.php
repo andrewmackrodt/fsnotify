@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Denimsoft\FsNotify;
 
 use Denimsoft\FsNotify\Adapter\AsyncWatch;
@@ -10,27 +12,39 @@ use Throwable;
 class ShutdownHandler
 {
     /**
-     * @var bool
-     */
-    private $registered = false;
-
-    /**
      * @var AsyncWatch[]
      */
     private $asyncWatches = [];
+    /**
+     * @var bool
+     */
+    private $registered = false;
 
     public function addAsyncWatch(AsyncWatch $asyncWatch): void
     {
         $this->asyncWatches[] = $asyncWatch;
     }
 
-    public function removeAsyncWatch(AsyncWatch $asyncWatch): void
+    /**
+     * @throws ShutdownException
+     */
+    public function handle(): void
     {
-        if (($off = array_search($asyncWatch, $this->asyncWatches)) !== false) {
-            unset($this->asyncWatches[$off]);
+        $exceptions = [];
 
-            $this->asyncWatches = array_values($this->asyncWatches);
+        foreach ($this->asyncWatches as $asyncWatch) {
+            try {
+                $asyncWatch->stop();
+            } catch (Throwable $e) {
+                $exceptions[] = $e;
+            }
         }
+
+        if ( ! $exceptions) {
+            return;
+        }
+
+        throw ShutdownException::create($exceptions);
     }
 
     public function register(): void
@@ -44,22 +58,12 @@ class ShutdownHandler
         $this->registered = true;
     }
 
-    public function handle(): void
+    public function removeAsyncWatch(AsyncWatch $asyncWatch): void
     {
-        $exceptions = [];
+        if (($off = array_search($asyncWatch, $this->asyncWatches, true)) !== false) {
+            unset($this->asyncWatches[$off]);
 
-        foreach ($this->asyncWatches as $asyncWatch) {
-            try {
-                $asyncWatch->stop();
-            } catch (Throwable $e) {
-                $exceptions[] = $e;
-            }
+            $this->asyncWatches = array_values($this->asyncWatches);
         }
-
-        if (!$exceptions) {
-            return;
-        }
-
-        throw ShutdownException::create($exceptions);
     }
 }

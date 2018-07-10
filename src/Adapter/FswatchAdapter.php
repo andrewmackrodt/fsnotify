@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Denimsoft\FsNotify\Adapter;
 
 use Amp\Coroutine;
@@ -20,16 +22,16 @@ class FswatchAdapter extends ConfigurableAdapter
 
     private $statErrors = [];
 
+    public static function getCapabilities(): array
+    {
+        return [];
+    }
+
     public static function getDefaultOptions(): array
     {
         return [
             self::OPTION_STAT_ERROR_TIMEOUT => 2.00,
         ];
-    }
-
-    public static function getCapabilities(): array
-    {
-        return [];
     }
 
     public function watch(array $watchers, EventBridge $eventBridge): AsyncWatch
@@ -51,51 +53,15 @@ class FswatchAdapter extends ConfigurableAdapter
 
                 return all($promises);
             })(),
-            function () use ($processes) {
+            function () use ($processes): void {
                 foreach ($processes as $process) {
-                    if (!$process->isRunning()) {
+                    if ( ! $process->isRunning()) {
                         return;
                     }
                     $process->kill();
                 }
-            });
-    }
-
-    private function processOutput(EventBridge $eventBridge, Process $process): Generator
-    {
-        $stream = $process->getStdout();
-
-        while (($chunk = yield $stream->read()) !== null) {
-            $adapterEvents = $this->getFileAdapterEvents($chunk);
-            $fileEvents = $this->createEventsFromAdapterEvents($adapterEvents);
-
-            foreach ($fileEvents as $fileEvent) {
-                $eventBridge->dispatch($fileEvent);
             }
-        }
-    }
-
-    private function getFileAdapterEvents(string $output): array
-    {
-        preg_match_all('/^(?<filepath>.+?) (?:[a-z]+\|)*(?<event>Updated|Created|Removed|AttributeModified)(?:\|[a-z]+)*$/im',
-            $output, $matches, PREG_SET_ORDER);
-
-        if (empty($matches[0]['filepath'])) {
-            return [];
-        }
-
-        $adapterEvents = [];
-
-        foreach ($matches as $match) {
-            $adapterEvent = &$adapterEvents[$match['filepath']];
-            if ($adapterEvent === null) {
-                $adapterEvent = [];
-            }
-            $adapterEvent = array_merge($adapterEvent, [$match['event']]);
-        }
-        unset($adapterEvent);
-
-        return $adapterEvents;
+        );
     }
 
     private function createEventsFromAdapterEvents(array $adapterEvents): array
@@ -108,7 +74,8 @@ class FswatchAdapter extends ConfigurableAdapter
 
                 function (string $adapterEvent) {
                     return $adapterEvent === 'Created' || $adapterEvent === 'Removed';
-                })));
+                }
+            )));
 
             // continue if the file was created and removed, it is probably
             // a temporary file, e.g. atomic file saving
@@ -163,5 +130,46 @@ class FswatchAdapter extends ConfigurableAdapter
             $watcher->isRecursive() ? '--recursive' : '',
             escapeshellarg($watcher->getFilepath())
         ));
+    }
+
+    private function getFileAdapterEvents(string $output): array
+    {
+        preg_match_all(
+            '/^(?<filepath>.+?) (?:[a-z]+\|)*(?<event>Updated|Created|Removed|AttributeModified)(?:\|[a-z]+)*$/im',
+            $output,
+            $matches,
+            PREG_SET_ORDER
+        );
+
+        if (empty($matches[0]['filepath'])) {
+            return [];
+        }
+
+        $adapterEvents = [];
+
+        foreach ($matches as $match) {
+            $adapterEvent = &$adapterEvents[$match['filepath']];
+            if ($adapterEvent === null) {
+                $adapterEvent = [];
+            }
+            $adapterEvent = array_merge($adapterEvent, [$match['event']]);
+        }
+        unset($adapterEvent);
+
+        return $adapterEvents;
+    }
+
+    private function processOutput(EventBridge $eventBridge, Process $process): Generator
+    {
+        $stream = $process->getStdout();
+
+        while (($chunk = yield $stream->read()) !== null) {
+            $adapterEvents = $this->getFileAdapterEvents($chunk);
+            $fileEvents    = $this->createEventsFromAdapterEvents($adapterEvents);
+
+            foreach ($fileEvents as $fileEvent) {
+                $eventBridge->dispatch($fileEvent);
+            }
+        }
     }
 }

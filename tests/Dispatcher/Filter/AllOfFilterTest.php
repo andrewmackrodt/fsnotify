@@ -1,16 +1,13 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Denimsoft\FsNotify\Test\Dispatcher\Filter;
 
 use Denimsoft\FsNotify\Dispatcher\Filter\AllOfFilter;
 
 class AllOfFilterTest extends FilterTestCase
 {
-    protected function getFilterClass(): string
-    {
-        return AllOfFilter::class;
-    }
-
     public function canDispatchProvider(): array
     {
         return [
@@ -25,9 +22,9 @@ class AllOfFilterTest extends FilterTestCase
      * @dataProvider canDispatchProvider
      *
      * @param bool[] $filterValues
-     * @param bool $expectation
+     * @param bool   $expectation
      */
-    public function testCanDispatchEvent(array $filterValues, bool $expectation)
+    public function testCanDispatchEvent(array $filterValues, bool $expectation): void
     {
         $filters = [];
 
@@ -35,17 +32,22 @@ class AllOfFilterTest extends FilterTestCase
             $filters[] = $this->createMockFilterWithReturn($mockReturnResult);
         }
 
-        $this->assertEquals($expectation, $this->createFilterCallCanDispatchEvent($filters));
+        $this->assertSame($expectation, $this->createFilterCallCanDispatchEvent($filters));
     }
 
-    public function testCanDispatchStopsEvaluatingAfterFirstFailure()
+    public function testCanDispatchStopsEvaluatingAfterFirstFailure(): void
     {
-        $filters = [];
+        $filters   = [];
         $filters[] = $this->createMockFilterWithReturn(true);
         $filters[] = $this->createMockFilterWithReturn(true);
         $filters[] = $this->createMockFilterWithReturn(false);
         $filters[] = $this->createMockFilterNoAssertions();
 
-        $this->assertEquals(false, $this->createFilterCallCanDispatchEvent($filters));
+        $this->assertSame(false, $this->createFilterCallCanDispatchEvent($filters));
+    }
+
+    protected function getFilterClass(): string
+    {
+        return AllOfFilter::class;
     }
 }

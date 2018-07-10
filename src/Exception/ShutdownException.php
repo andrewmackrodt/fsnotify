@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Denimsoft\FsNotify\Exception;
 
 use RuntimeException;
@@ -12,7 +14,7 @@ class ShutdownException extends RuntimeException implements FsNotifyException
      */
     private $exceptions;
 
-    public function __construct(string $message = '', int $code = 0, array $exceptions)
+    public function __construct(string $message, int $code, array $exceptions)
     {
         parent::__construct($message, $code, reset($exceptions));
 

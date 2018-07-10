@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Denimsoft\FsNotify\Adapter;
 
 use Denimsoft\FsNotify\EventBridge;
@@ -18,7 +20,7 @@ interface FsNotifyAdapter
      * was started to monitor the directory, i.e. new events after the initial
      * copy operation will be detected.
      */
-    const CAPABILITY_RECURSES_DIRECTORY_ON_COPY  = 'recursesDirectoryOnCopy';
+    const CAPABILITY_RECURSES_DIRECTORY_ON_COPY = 'recursesDirectoryOnCopy';
 
     /**
      * Fires FileDeletedEvent and FileCreatedEvent events for all files contained
@@ -26,17 +28,17 @@ interface FsNotifyAdapter
      * behave as if a new watcher was started to monitor the directory, i.e. new
      * events after the initial move operation will be detected.
      */
-    const CAPABILITY_RECURSES_DIRECTORY_ON_MOVE  = 'recursesDirectoryOnMove';
+    const CAPABILITY_RECURSES_DIRECTORY_ON_MOVE = 'recursesDirectoryOnMove';
 
     /**
-     * Returns an array of adapter capabilities
+     * Returns an array of adapter capabilities.
      *
      * @return string[]
      */
     public static function getCapabilities(): array;
 
     /**
-     * @param Watcher[] $watchers
+     * @param Watcher[]   $watchers
      * @param EventBridge $eventBridge
      *
      * @return AsyncWatch

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Denimsoft\FsNotify\Subscriber;
 
 use Denimsoft\FsNotify\Dispatcher\FileEventDispatcher;
@@ -12,6 +14,21 @@ use Symfony\Component\EventDispatcher\EventSubscriberInterface as EventSubscribe
 
 class FileEventSubscriber implements EventSubscriber
 {
+    /**
+     * @var FileEventDispatcher
+     */
+    private $fileEventDispatcher;
+
+    public function __construct(FileEventDispatcher $fileEventDispatcher)
+    {
+        $this->fileEventDispatcher = $fileEventDispatcher;
+    }
+
+    public function dispatch(FileEvent $event, string $name, EventDispatcher $events): void
+    {
+        $this->fileEventDispatcher->dispatch(...func_get_args());
+    }
+
     /**
      * Returns an array of event names this subscriber wants to listen to.
      *
@@ -37,20 +54,5 @@ class FileEventSubscriber implements EventSubscriber
             FileModifiedEvent::getEventName() => 'dispatch',
             FileDeletedEvent::getEventName()  => 'dispatch',
         ];
-    }
-
-    /**
-     * @var FileEventDispatcher
-     */
-    private $fileEventDispatcher;
-
-    public function __construct(FileEventDispatcher $fileEventDispatcher)
-    {
-        $this->fileEventDispatcher = $fileEventDispatcher;
-    }
-
-    public function dispatch(FileEvent $event, string $name, EventDispatcher $events): void
-    {
-        $this->fileEventDispatcher->dispatch(...func_get_args());
     }
 }

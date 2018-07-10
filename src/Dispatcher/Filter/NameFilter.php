@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Denimsoft\FsNotify\Dispatcher\Filter;
 
 use Denimsoft\FsNotify\Event\FileEvent;
@@ -32,6 +34,6 @@ class NameFilter implements FsNotifyFilter
         // wildcard filename match
         $pattern = str_replace(['\*\*', '\*'], ['.*?', '[^\/]*?'], preg_quote($this->filename, '/'));
 
-        return preg_match("/^$pattern$/", $event->getFilename());
+        return (bool) preg_match("/^$pattern$/", $event->getFilename());
     }
 }

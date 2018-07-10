@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Denimsoft\FsNotify;
 
 use Denimsoft\FsNotify\Dispatcher\Filter\FsNotifyFilter;
@@ -10,45 +12,40 @@ class Watcher
     use FileEventListener;
 
     /**
-     * @var string
-     */
-    private $filepath;
-
-    /**
-     * @var bool
-     */
-    private $recurse;
-
-    /**
      * @var FsNotifyBuilder
      */
     private $builder;
+
+    /**
+     * @var string
+     */
+    private $filepath;
 
     /**
      * @var FsNotifyFilter|null
      */
     private $filter;
 
+    /**
+     * @var bool
+     */
+    private $recurse;
+
     public function __construct(string $filepath, bool $recurse, FsNotifyBuilder $builder)
     {
         $this->filepath = normalize_path($filepath);
-        $this->recurse = $recurse;
-        $this->builder = $builder;
-    }
-
-    public function getFilepath(): string
-    {
-        return $this->filepath;
-    }
-
-    public function isRecursive(): bool
-    {
-        return $this->recurse;
+        $this->recurse  = $recurse;
+        $this->builder  = $builder;
     }
 
     public function getBuilder(): FsNotifyBuilder
     {
         return $this->builder;
+    }
+
+    public function getFilepath(): string
+    {
+        return $this->filepath;
     }
 
     /**
@@ -57,6 +54,11 @@ class Watcher
     public function getFilter(): ?FsNotifyFilter
     {
         return $this->filter;
+    }
+
+    public function isRecursive(): bool
+    {
+        return $this->recurse;
     }
 
     public function setFilter(?FsNotifyFilter $filter): self

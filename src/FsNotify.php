@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Denimsoft\FsNotify;
 
 use Amp\ReactAdapter\ReactAdapter;
@@ -11,29 +13,9 @@ use LogicException;
 class FsNotify
 {
     /**
-     * @var ReactAdapter
-     */
-    private $eventLoop;
-
-    /**
      * @var FsNotifyAdapter
      */
     private $adapter;
-
-    /**
-     * @var EventBridge
-     */
-    private $eventBridge;
-
-    /**
-     * @var Watcher[]
-     */
-    private $watchers;
-
-    /**
-     * @var ShutdownHandler
-     */
-    private $shutdownHandler;
 
     /**
      * @var AsyncWatch|null
@@ -41,10 +23,29 @@ class FsNotify
     private $asyncWatch;
 
     /**
-     * @param ReactAdapter $eventLoop
+     * @var EventBridge
+     */
+    private $eventBridge;
+    /**
+     * @var ReactAdapter
+     */
+    private $eventLoop;
+
+    /**
+     * @var ShutdownHandler
+     */
+    private $shutdownHandler;
+
+    /**
+     * @var Watcher[]
+     */
+    private $watchers;
+
+    /**
+     * @param ReactAdapter    $eventLoop
      * @param FsNotifyAdapter $adapter
-     * @param EventBridge $eventBridge
-     * @param Watcher[] $watchers
+     * @param EventBridge     $eventBridge
+     * @param Watcher[]       $watchers
      */
     public function __construct(
         ReactAdapter $eventLoop,
@@ -52,14 +53,14 @@ class FsNotify
         EventBridge $eventBridge,
         array $watchers
     ) {
-        $this->eventLoop = $eventLoop;
-        $this->adapter = $adapter;
-        $this->eventBridge = $eventBridge;
-        $this->watchers = $watchers;
+        $this->eventLoop       = $eventLoop;
+        $this->adapter         = $adapter;
+        $this->eventBridge     = $eventBridge;
+        $this->watchers        = $watchers;
         $this->shutdownHandler = new ShutdownHandler();
     }
 
-    public function start()
+    public function start(): void
     {
         if ($this->asyncWatch) {
             throw new LogicException('FsNotify is already running');
@@ -87,7 +88,7 @@ class FsNotify
 
     public function stop(): void
     {
-        if (!$this->asyncWatch) {
+        if ( ! $this->asyncWatch) {
             throw new LogicException('FsNotify is not running');
         }
 

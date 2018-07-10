@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Denimsoft\FsNotify\Event;
 
 use Symfony\Component\EventDispatcher\Event;
@@ -22,14 +24,14 @@ abstract class FileEvent extends Event implements FsNotifyEvent
         $this->metadata = $metadata;
     }
 
-    public function getFilepath(): string
-    {
-        return $this->filepath;
-    }
-
     public function getFilename(): string
     {
         return basename($this->filepath);
+    }
+
+    public function getFilepath(): string
+    {
+        return $this->filepath;
     }
 
     public function getMetadata(): array

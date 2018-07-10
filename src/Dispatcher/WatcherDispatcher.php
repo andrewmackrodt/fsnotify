@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Denimsoft\FsNotify\Dispatcher;
 
 use Amp\ReactAdapter\ReactAdapter;
@@ -13,14 +15,14 @@ class WatcherDispatcher implements FileEventDispatcher
     use FilterableWatcherDispatcher;
 
     /**
-     * @var Watcher
-     */
-    private $watcher;
-
-    /**
      * @var ReactAdapter
      */
     private $eventLoop;
+
+    /**
+     * @var Watcher
+     */
+    private $watcher;
 
     public function __construct(Watcher $watcher, ReactAdapter $eventLoop)
     {
@@ -31,7 +33,7 @@ class WatcherDispatcher implements FileEventDispatcher
     public function dispatch(FileEvent $event, string $eventName, EventDispatcher $events): void
     {
         if ($event->isPropagationStopped()
-            || !$this->isWatcherForEvent($this->watcher, $event)
+            || ! $this->isWatcherForEvent($this->watcher, $event)
             || $this->isFiltered($this->watcher, $event)
         ) {
             return;

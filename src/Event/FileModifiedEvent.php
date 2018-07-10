@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Denimsoft\FsNotify\Event;
 
 class FileModifiedEvent extends FileEvent

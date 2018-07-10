@@ -1,19 +1,15 @@
 <?php
 
-namespace Denimsoft\FsNotify {
+declare(strict_types=1);
 
-    /**
-     * @param string $path
-     *
-     * @return string
-     */
+namespace Denimsoft\FsNotify {
     function normalize_path(string $path): string
     {
         $normalized = preg_replace('#/{2,}#', '/', rtrim(str_replace('\\', '/', $path), '/'));
         if ($normalized && $normalized[0] !== '/') {
             $normalized = getcwd() . "/$normalized";
         }
-        $split = explode('/', $normalized);
+        $split           = explode('/', $normalized);
         $normalizedSplit = [];
 
         foreach ($split as $segment) {
@@ -37,7 +33,6 @@ namespace Denimsoft\FsNotify {
 }
 
 namespace Denimsoft\FsNotify\Dispatcher\Filter {
-
     /**
      * @param FsNotifyFilter[] $filters
      *
@@ -50,7 +45,6 @@ namespace Denimsoft\FsNotify\Dispatcher\Filter {
 }
 
 namespace Denimsoft\FsNotify\Dispatcher\Filter {
-
     /**
      * @param FsNotifyFilter[] $filters
      *
@@ -63,7 +57,6 @@ namespace Denimsoft\FsNotify\Dispatcher\Filter {
 }
 
 namespace Denimsoft\FsNotify\Dispatcher\Filter {
-
     /**
      * @param FsNotifyFilter $filter
      *

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Denimsoft\FsNotify\Dispatcher;
 
 use Amp\ReactAdapter\ReactAdapter;
@@ -13,6 +15,11 @@ class GlobalDispatcher implements FileEventDispatcher
     use FilterableWatcherDispatcher;
 
     /**
+     * @var ReactAdapter
+     */
+    private $eventLoop;
+
+    /**
      * @var callback[]
      */
     private $listeners;
@@ -22,12 +29,7 @@ class GlobalDispatcher implements FileEventDispatcher
      */
     private $watchers;
 
-    /**
-     * @var ReactAdapter
-     */
-    private $eventLoop;
-
-    public function __construct(array $listeners = [], array $watchers, ReactAdapter $eventLoop)
+    public function __construct(array $listeners, array $watchers, ReactAdapter $eventLoop)
     {
         $this->listeners = $listeners;
         $this->watchers  = $watchers;
@@ -42,12 +44,12 @@ class GlobalDispatcher implements FileEventDispatcher
             return;
         }
 
-        $listeners = $this->listeners[$event->getEventName()] ?? [];
+        $listeners   = $this->listeners[$event->getEventName()] ?? [];
         $relFilepath = substr($event->getFilepath(), strlen($watcher->getFilepath()) + 1);
 
         foreach ($listeners as $listener) {
             // continue if the listener filter does not match
-            if ($listener['filter'] && !$listener['filter']->canDispatchEvent($event, $relFilepath)) {
+            if ($listener['filter'] && ! $listener['filter']->canDispatchEvent($event, $relFilepath)) {
                 continue;
             }
 
@@ -64,7 +66,7 @@ class GlobalDispatcher implements FileEventDispatcher
     private function getFirstWatcherForEvent(FileEvent $event): ?Watcher
     {
         foreach ($this->watchers as $watcher) {
-            if ($this->isWatcherForEvent($watcher, $event) && !$this->isFiltered($watcher, $event)) {
+            if ($this->isWatcherForEvent($watcher, $event) && ! $this->isFiltered($watcher, $event)) {
                 return $watcher;
             }
         }

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Denimsoft\FsNotify\Dispatcher\Filter;
 
 use Denimsoft\FsNotify\Event\FileEvent;
@@ -15,7 +17,7 @@ class PathFilter implements FsNotifyFilter
      * Filter files with an exact filepath match. This filter supports two types
      * of wildcard expansion, greedy "\**" and non-greedy "\*". For example, to
      * match the filepath "src/Dispatcher/Filter/PathFilter.php", any of the
-     * following patterns would match:
+     * following patterns would match:.
      *
      * ```
      * No wildcard
@@ -47,6 +49,6 @@ class PathFilter implements FsNotifyFilter
         // wildcard pathname match
         $pattern = str_replace(['\*\*', '\*'], ['.*?', '[^\/]*?'], preg_quote($this->pathname, '/'));
 
-        return preg_match("/^$pattern$/", $relFilepath);
+        return (bool) preg_match("/^$pattern$/", $relFilepath);
     }
 }
