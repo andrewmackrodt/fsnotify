@@ -45,6 +45,10 @@ See the examples directory for complete usage:
 - [examples/fswatch.php](examples/fswatch.php)
 - [examples/async.php](examples/async.php)
 - [examples/advanced.php](examples/advanced.php)
+- [examples/laravel-ide-helper.php](examples/laravel-ide-helper.php)
+
+This library was developed with the [laravel-ide-helper](examples/laravel-ide-helper.php)
+use case in mind, it highlights a moderately complicated yet useful usage scenario.
 
 **Adapters**
 
