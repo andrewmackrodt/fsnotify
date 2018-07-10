@@ -1,7 +1,7 @@
 # FsNotify
 
 [![Build Status](https://img.shields.io/travis/andrewmackrodt/fsnotify/develop.svg?style=flat-square)](https://travis-ci.com/andrewmackrodt/fsnotify)
-![License](https://img.shields.io/badge/license-MIT-blue.svg?style=flat-square)
+[![License](https://img.shields.io/badge/license-MIT-blue.svg?style=flat-square)](LICENSE)
 
 Event based file system watcher for PHP. FsNotify is fully async and event based using [Amp](https://github.com/amphp/amp) and [Symfony\EventDispatcher](https://github.com/symfony/event-dispatcher).
 
