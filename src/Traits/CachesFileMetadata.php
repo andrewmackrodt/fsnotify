@@ -27,6 +27,8 @@ trait CachesFileMetadata
 
         $oldFileMetadata = $this->metadata[$file->getPathname()] ?? null;
 
+        \clearstatcache(false, (string)$file);
+
         try {
             $fileMetadata = [
                 'filetype'    => $file->isDir() ? 'directory' : 'file',

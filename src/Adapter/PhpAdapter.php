@@ -148,7 +148,7 @@ class PhpAdapter extends ConfigurableAdapter
     {
         $filepath = $watcher->getFilepath();
 
-        clearstatcache(true, $filepath);
+        \clearstatcache(true, $filepath);
 
         if (is_file($filepath)) {
             $files = [];
