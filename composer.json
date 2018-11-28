@@ -12,7 +12,7 @@
   "require": {
     "php": "^7.1",
     "amphp/process": "^0.3.3",
-    "amphp/react-adapter": "^2.0",
+    "amphp/react-adapter": "dev-promise",
     "react/event-loop": "^0.5.3",
     "symfony/event-dispatcher": "^4.1"
   },
@@ -35,6 +35,9 @@
       "Denimsoft\\FsNotify\\Test\\": "tests/"
     }
   },
+  "repositories": [
+    { "type": "vcs", "url": "https://github.com/andrewmackrodt/react-adapter" }
+  ],
   "config": {
     "sort-packages": true
   }
