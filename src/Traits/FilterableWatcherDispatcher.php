@@ -26,6 +26,10 @@ trait FilterableWatcherDispatcher
     {
         $relFilepath = substr($event->getFilepath(), strlen($watcher->getFilepath()) + 1);
 
+        if ($relFilepath === false) {
+            return false;
+        }
+
         if (($filter = $watcher->getFilter()) !== null) {
             if ( ! $filter->canDispatchEvent($event, $relFilepath)) {
                 return true;
