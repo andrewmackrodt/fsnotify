@@ -6,7 +6,7 @@ namespace Denimsoft\FsNotify\Traits;
 
 use SplFileInfo;
 
-trait CachesFileMetadata
+trait FileMetadataCache
 {
     /**
      * @var array
@@ -27,7 +27,7 @@ trait CachesFileMetadata
 
         $oldFileMetadata = $this->metadata[$file->getPathname()] ?? null;
 
-        \clearstatcache(false, (string)$file);
+        \clearstatcache(false, (string) $file);
 
         try {
             $fileMetadata = [

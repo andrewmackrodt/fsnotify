@@ -46,6 +46,11 @@ class PhpAdapter extends ConfigurableAdapter
         ];
     }
 
+    public static function isSupported(): bool
+    {
+        return true;
+    }
+
     public function watch(array $watchers, EventBridge $eventBridge): AsyncWatch
     {
         $running = true;
@@ -179,10 +184,10 @@ class PhpAdapter extends ConfigurableAdapter
             );
         } catch (UnexpectedValueException $e) {
             if ( ! array_filter(
-                    self::DIRECTORY_ITERATOR_IGNORED_ERRORS,
-                    function (string $error) use ($e) {
-                        return stripos($e->getMessage(), $error) !== false;
-                    }
+                self::DIRECTORY_ITERATOR_IGNORED_ERRORS,
+                function (string $error) use ($e) {
+                    return stripos($e->getMessage(), $error) !== false;
+                }
             )
             ) {
                 throw $e;

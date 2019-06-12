@@ -6,8 +6,8 @@ namespace Denimsoft\FsNotify;
 
 use Amp\Loop;
 use Amp\ReactAdapter\ReactAdapter;
+use Denimsoft\FsNotify\Adapter\Factory;
 use Denimsoft\FsNotify\Adapter\FsNotifyAdapter;
-use Denimsoft\FsNotify\Adapter\PhpAdapter;
 use Denimsoft\FsNotify\Dispatcher\GlobalDispatcher;
 use Denimsoft\FsNotify\Dispatcher\WatcherDispatcher;
 use Denimsoft\FsNotify\Event\ShutdownEvent;
@@ -87,7 +87,9 @@ class FsNotifyBuilder
 
     private function createDefaultAdapter(): FsNotifyAdapter
     {
-        return new PhpAdapter();
+        $factory = new Factory();
+
+        return $factory();
     }
 
     private function createDefaultEventDispatcher(): EventDispatcherInterface

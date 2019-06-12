@@ -5,8 +5,10 @@ declare(strict_types=1);
 namespace Denimsoft\FsNotify\Adapter;
 
 use Amp\Coroutine;
+use Amp\LazyPromise;
 use Amp\Process\Process;
 use Amp\Promise;
+use function Amp\Promise\all;
 use Denimsoft\FsNotify\Event\FileCreatedEvent;
 use Denimsoft\FsNotify\Event\FileDeletedEvent;
 use Denimsoft\FsNotify\Event\FileModifiedEvent;
@@ -14,7 +16,6 @@ use Denimsoft\FsNotify\EventBridge;
 use Denimsoft\FsNotify\Watcher;
 use Generator;
 use RuntimeException;
-use function Amp\Promise\all;
 
 class FswatchAdapter extends ConfigurableAdapter
 {
@@ -34,6 +35,13 @@ class FswatchAdapter extends ConfigurableAdapter
         ];
     }
 
+    public static function isSupported(): bool
+    {
+        exec('fswatch --version 2>/dev/null', $output, $exitCode);
+
+        return $exitCode === 0;
+    }
+
     public function watch(array $watchers, EventBridge $eventBridge): AsyncWatch
     {
         /** @var Process[] $processes */
@@ -47,8 +55,12 @@ class FswatchAdapter extends ConfigurableAdapter
                 foreach ($watchers as $watcher) {
                     $process = $this->createProcess($watcher);
                     $processes[] = $process;
-                    $process->start();
-                    $promises[] = new Coroutine($this->processOutput($eventBridge, $process));
+
+                    $promises[] = new LazyPromise(function () use ($eventBridge, $process) {
+                        yield $process->start();
+
+                        return new Coroutine($this->processOutput($eventBridge, $process));
+                    });
                 }
 
                 return all($promises);
@@ -71,7 +83,6 @@ class FswatchAdapter extends ConfigurableAdapter
         foreach ($adapterEvents as $filepath => $fileAdapterEvents) {
             $fileAdapterEvents = array_values(array_unique(array_filter(
                 $fileAdapterEvents,
-
                 function (string $adapterEvent) {
                     return $adapterEvent === 'Created' || $adapterEvent === 'Removed';
                 }

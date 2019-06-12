@@ -15,7 +15,6 @@ trait FilterableWatcherDispatcher
 
         return array_filter(
             $watcher->getListeners($event->getEventName()),
-
             function (array $listener) use ($event, $relFilepath) {
                 return ! $listener['filter'] || $listener['filter']->canDispatchEvent($event, $relFilepath);
             }

@@ -2,12 +2,32 @@
 
 declare(strict_types=1);
 
-$finder = PhpCsFixer\Finder::create()
+$projectFilesFinder = PhpCsFixer\Finder::create()
     ->in(__DIR__)
-    ->name('.php_cs');
+;
+
+$executableFilesFinder = PhpCsFixer\Finder::create()
+    ->in(__DIR__)
+    ->depth('< 2')
+    ->name('/^[^.]+$/')
+    ->contains('@^#!(/usr(/local)?)?/bin/(env )?php([5-7](\.[0-9]+))?\n@')
+;
+
+$configFilesFinder = PhpCsFixer\Finder::create()
+    ->in(__DIR__)
+    ->depth('< 1')
+    ->ignoreDotFiles(false)
+    ->notName('/^[^.]/')
+    ->name('/^\.[^.]+$/')
+    ->contains('@^<\?php[\n ]@')
+;
 
 return PhpCsFixer\Config::create()
-    ->setFinder($finder)
+    ->setFinder(array_replace(
+        iterator_to_array($projectFilesFinder),
+        iterator_to_array($executableFilesFinder),
+        iterator_to_array($configFilesFinder)
+    ))
     ->setRiskyAllowed(true)
     ->setRules([
         '@PHP71Migration'                        => true,
@@ -32,7 +52,7 @@ return PhpCsFixer\Config::create()
         'method_chaining_indentation'            => true,
         'modernize_types_casting'                => true,
         'multiline_comment_opening_closing'      => true,
-        'multiline_whitespace_before_semicolons' => true,
+        'multiline_whitespace_before_semicolons' => ['strategy' => 'new_line_for_chained_calls'],
         'no_alternative_syntax'                  => true,
         'no_null_property_initialization'        => true,
         'no_php4_constructor'                    => true,
@@ -49,4 +69,5 @@ return PhpCsFixer\Config::create()
         'strict_param'                           => true,
         'string_line_ending'                     => true,
         'yoda_style'                             => false,
-    ]);
+    ])
+;

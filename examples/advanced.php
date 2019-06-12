@@ -3,10 +3,10 @@
 /**
  * Example demonstrating multiple watchers and listeners using different filters.
  */
+use function Denimsoft\FsNotify\Dispatcher\Filter\anyOf;
 use Denimsoft\FsNotify\Dispatcher\Filter\NameFilter;
 use Denimsoft\FsNotify\Dispatcher\Filter\PathFilter;
 use Denimsoft\FsNotify\FsNotifyBuilder;
-use function Denimsoft\FsNotify\Dispatcher\Filter\anyOf;
 
 require_once __DIR__ . '/bootstrap.php';
 
@@ -28,6 +28,7 @@ $fsNotify = (new FsNotifyBuilder())
     ->addChangeListener(debug_listener('global'))
 
     // create the fsNotify object
-    ->createFsNotify();
+    ->createFsNotify()
+;
 
 $fsNotify->start();

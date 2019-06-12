@@ -38,6 +38,13 @@ interface FsNotifyAdapter
     public static function getCapabilities(): array;
 
     /**
+     * Returns whether the adapter is supported.
+     *
+     * @return bool
+     */
+    public static function isSupported(): bool;
+
+    /**
      * @param Watcher[]   $watchers
      * @param EventBridge $eventBridge
      *

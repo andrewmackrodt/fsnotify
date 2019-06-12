@@ -1,7 +1,7 @@
 <?php
 
 declare(strict_types=1);
-/**
+/*
  * Bootstrap for the examples within the directory.
  */
 use Denimsoft\FsNotify\Event\FileEvent;

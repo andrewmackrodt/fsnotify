@@ -31,8 +31,10 @@ class AsyncWatch
 
     public function stop(): void
     {
-        if (($shutdownHandler = $this->shutdownHandler) !== null) {
-            $shutdownHandler();
+        if ($this->shutdownHandler === null) {
+            return;
         }
+
+        call_user_func($this->shutdownHandler);
     }
 }

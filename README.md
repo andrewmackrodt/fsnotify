@@ -42,7 +42,6 @@ FsNotify supports monitoring multiple paths with configurable callbacks and filt
 See the examples directory for complete usage:
 
 - [examples/standard.php](examples/standard.php)
-- [examples/fswatch.php](examples/fswatch.php)
 - [examples/async.php](examples/async.php)
 - [examples/advanced.php](examples/advanced.php)
 - [examples/laravel-ide-helper.php](examples/laravel-ide-helper.php)
@@ -52,9 +51,9 @@ use case in mind, it highlights a moderately complicated yet useful usage scenar
 
 **Adapters**
 
-**PhpAdapter** - the default adapter which uses file polling to detect changes. The adapter
-defaults to a configurable polling interval of 1 second. It is sufficient for monitoring
-a small amount of files.
+**PhpAdapter** - fallback adapter if no other adapters are supported. PhpAdapter
+uses file polling to detect changes. The adapter defaults to a configurable polling
+interval of 1 second. It is sufficient for monitoring a small amount of files.
 
 **FswatchAdapter** - fswatch requires the GNU CLI tool fswatch, it's more performant than
 PhpAdapter and detects file changes almost instantaneously. It is preferred in most cases

@@ -26,7 +26,7 @@ $fsNotify = (new FsNotifyBuilder())
 
             for ($i = 1; $i <= 5; ++$i) {
                 $process = new Process('sleep 2; date');
-                $process->start();
+                yield $process->start();
                 while (($chunk = yield $process->getStdout()->read()) !== null) {
                     echo "\tasync: $chunk";
                 }
@@ -52,6 +52,7 @@ $fsNotify = (new FsNotifyBuilder())
         echo "{$event->getEventName()}($mtime): {$event->getFilepath()}\n";
     })
     ->getBuilder()
-    ->createFsNotify();
+    ->createFsNotify()
+;
 
 $fsNotify->start();

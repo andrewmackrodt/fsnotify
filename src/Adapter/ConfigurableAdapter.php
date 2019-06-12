@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace Denimsoft\FsNotify\Adapter;
 
-use Denimsoft\FsNotify\Traits\CachesFileMetadata;
+use Denimsoft\FsNotify\Traits\FileMetadataCache;
 
 abstract class ConfigurableAdapter implements FsNotifyAdapter
 {
-    use CachesFileMetadata;
+    use FileMetadataCache;
 
     /**
      * @var array

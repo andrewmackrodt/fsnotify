@@ -11,15 +11,14 @@
  */
 use Amp\Coroutine;
 use Amp\Delayed;
+use Amp\LazyPromise;
 use Amp\Process\Process;
 use Amp\Promise;
+use function Amp\Promise\all;
 use Amp\ReactAdapter\ReactAdapter as EventLoop;
-use Denimsoft\FsNotify\Adapter\FswatchAdapter;
-use Denimsoft\FsNotify\Adapter\PhpAdapter;
 use Denimsoft\FsNotify\Event\FileEvent;
 use Denimsoft\FsNotify\FsNotifyBuilder;
 use Illuminate\Contracts\Console\Kernel;
-use function Amp\Promise\all;
 
 require_once __DIR__ . '/../vendor/autoload.php';
 
@@ -28,14 +27,8 @@ $app = require_once __DIR__ . '/../bootstrap/app.php';
 $app->make(Kernel::class)->bootstrap();
 chdir(base_path());
 
-// use the fswatch adapter if it's supported
-$adapter = stripos(shell_exec('fswatch --version 2>/dev/null'), 'fswatch') !== false
-    ? new FswatchAdapter()
-    : new PhpAdapter();
-
 // create the builder to add watchers to
 $builder = (new FsNotifyBuilder())
-    ->setAdapter($adapter)
     ->addAsyncChangeListener(new class() {
         /**
          * Allow 100 ms of drift due to imperfect timers.
@@ -72,11 +65,13 @@ $builder = (new FsNotifyBuilder())
 
         private function createProcess(string $command): Promise
         {
-            $process = new Process($command);
-            $process->start();
-            $this->processes[] = $process;
+            return new LazyPromise(function () use ($command) {
+                $process = new Process($command);
+                yield $process->start();
+                $this->processes[] = $process;
 
-            return new Coroutine($this->processOutput($process));
+                return new Coroutine($this->processOutput($process));
+            });
         }
 
         private function isEndOfFileChangeEvents(): ?Generator
@@ -116,7 +111,8 @@ $builder = (new FsNotifyBuilder())
                 echo $chunk;
             }
         }
-    });
+    })
+;
 
 //region determine which folders to watch
 $watch = [];
@@ -136,7 +132,7 @@ foreach (array_merge(
         continue;
     }
 
-    $watch[$path] = $builder->addWatcher($path);
+    $watch[$path] = $builder->addWatcher($path, true);
 }
 //endregion
 

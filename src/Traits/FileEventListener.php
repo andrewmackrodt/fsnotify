@@ -20,7 +20,8 @@ trait FileEventListener
     {
         return $this->addAsyncCreatedListener(...func_get_args())
             ->addAsyncModifiedListener(...func_get_args())
-            ->addAsyncDeletedListener(...func_get_args());
+            ->addAsyncDeletedListener(...func_get_args())
+        ;
     }
 
     public function addAsyncCreatedListener(callable $callback, FsNotifyFilter $filter = null): self
@@ -42,7 +43,8 @@ trait FileEventListener
     {
         return $this->addCreatedListener(...func_get_args())
             ->addModifiedListener(...func_get_args())
-            ->addDeletedListener(...func_get_args());
+            ->addDeletedListener(...func_get_args())
+        ;
     }
 
     public function addCreatedListener(callable $callback, FsNotifyFilter $filter = null): self

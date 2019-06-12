@@ -1,7 +1,8 @@
 .idea/
+!.idea/watcherTasks.xml
 build/
 vendor/
-!vendor/watcherTasks.xml
 .php_cs.cache
+.phpunit.result.cache
 composer.lock
-phpunit.xml.dist
+phpunit.xml

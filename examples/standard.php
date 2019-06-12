@@ -11,6 +11,7 @@ $fsNotify = (new FsNotifyBuilder())
     ->addWatcher(__DIR__ . '/../src', true)
     ->getBuilder()
     ->addChangeListener(debug_listener('global'))
-    ->createFsNotify();
+    ->createFsNotify()
+;
 
 $fsNotify->start();
